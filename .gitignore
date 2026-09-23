@@ -15,12 +15,15 @@ Thumbs.db
 # Logs
 *.log
 
+# SQL
+check_quiz_question.sql
+fix_quiz_question.sql
+
 # Storage
 storage/
 
 # Config with sensitive info
 src/main/resources/application.yml
-src/main/resources/application-local.yml
 
 # Mobile node_modules & cache
 **/node_modules/
