@@ -1,0 +1,9 @@
+{
+  "name": "gpsSign",
+  "version": "1.0.0",
+  "description": "GPS签到云函数",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC"
+}

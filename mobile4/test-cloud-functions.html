@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试云函数</title>
+</head>
+<body>
+    <h1>测试云函数</h1>
+    <div>
+        <h2>测试initData云函数</h2>
+        <button onclick="testInitData()">测试初始化数据</button>
+        <pre id="initDataResult"></pre>
+    </div>
+    
+    <div>
+        <h2>测试loginUser云函数</h2>
+        <button onclick="testLogin()">测试登录</button>
+        <pre id="loginResult"></pre>
+    </div>
+    
+    <div>
+        <h2>测试getUserList云函数</h2>
+        <button onclick="testGetUserList()">获取用户列表</button>
+        <pre id="userListResult"></pre>
+    </div>
+
+    <script>
+        const spaceId = 'mp-44d8765e-5b2e-47a6-bb16-8341a8ef6a7d';
+        const clientSecret = 'gLmrYJYdnGrRZzeHKwJedg==';
+        
+        async function callCloudFunction(name, data) {
+            const url = `https://api.bspapp.com/client/v1/function/invoke`;
+            const body = {
+                spaceId: spaceId,
+                function: name,
+                data: data
+            };
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${clientSecret}`
+                },
+                body: JSON.stringify(body)
+            });
+            
+            return await response.json();
+        }
+        
+        async function testInitData() {
+            const result = document.getElementById('initDataResult');
+            result.textContent = '正在测试...';
+            
+            try {
+                const response = await callCloudFunction('initData', {
+                    username: '12345678',
+                    password: '12345678',
+                    realName: '教师',
+                    role: '教师'
+                });
+                result.textContent = JSON.stringify(response, null, 2);
+            } catch (error) {
+                result.textContent = '错误: ' + error.message;
+            }
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('loginResult');
+            result.textContent = '正在测试...';
+            
+            try {
+                const response = await callCloudFunction('loginUser', {
+                    username: '12345678',
+                    password: '12345678'
+                });
+                result.textContent = JSON.stringify(response, null, 2);
+            } catch (error) {
+                result.textContent = '错误: ' + error.message;
+            }
+        }
+        
+        async function testGetUserList() {
+            const result = document.getElementById('userListResult');
+            result.textContent = '正在测试...';
+            
+            try {
+                const response = await callCloudFunction('getUserList', {});
+                result.textContent = JSON.stringify(response, null, 2);
+            } catch (error) {
+                result.textContent = '错误: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

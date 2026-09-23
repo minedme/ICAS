@@ -1,0 +1,12 @@
+{
+  "name": "generateQRCode",
+  "version": "1.0.0",
+  "description": "生成二维码云函数",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "qrcode": "^1.5.3"
+  }
+}

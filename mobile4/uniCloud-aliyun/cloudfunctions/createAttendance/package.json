@@ -1,0 +1,9 @@
+{
+  "name": "createAttendance",
+  "version": "1.0.0",
+  "description": "创建考勤云函数",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.AttendanceRecordMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.demo.model.AttendanceRecord">
+        <id column="id" property="id"/>
+        <result column="attendance_id" property="attendanceId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="attendance_type" property="attendanceType"/>
+        <result column="attendance_time" property="attendanceTime"/>
+        <result column="latitude" property="latitude"/>
+        <result column="longitude" property="longitude"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="file_path" property="filePath"/>
+    </resultMap>
+
+    <!-- 插入考勤记录 -->
+    <insert id="insert" parameterType="com.example.demo.model.AttendanceRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO attendance_record (attendance_id, student_id, attendance_type, attendance_time, 
+                                      latitude, longitude, status, remark, file_path)
+        VALUES (#{attendanceId}, #{studentId}, #{attendanceType}, #{attendanceTime}, 
+                #{latitude}, #{longitude}, #{status}, #{remark}, #{filePath})
+    </insert>
+
+    <!-- 根据考勤任务ID查询记录 -->
+    <select id="selectByAttendanceId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM attendance_record WHERE attendance_id = #{attendanceId}
+    </select>
+
+    <!-- 根据学生ID查询记录 -->
+    <select id="selectByStudentId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM attendance_record WHERE student_id = #{studentId}
+    </select>
+
+    <!-- 根据考勤任务ID和学生ID查询记录 -->
+    <select id="selectByAttendanceIdAndStudentId" parameterType="map" resultMap="BaseResultMap">
+        SELECT * FROM attendance_record
+        WHERE attendance_id = #{attendanceId} AND student_id = #{studentId}
+    </select>
+
+    <!-- 根据学生ID和日期范围查询记录 -->
+    <select id="selectByStudentIdAndDateRange" resultMap="BaseResultMap">
+        SELECT * FROM attendance_record
+        WHERE student_id = #{studentId}
+        AND attendance_time >= #{startDate}
+        AND attendance_time &lt; #{endDate}
+        ORDER BY attendance_time
+    </select>
+
+    <!-- 根据班级ID和日期范围查询记录 -->
+    <select id="selectByClassIdAndDateRange" resultMap="BaseResultMap">
+        SELECT ar.* FROM attendance_record ar
+        JOIN user u ON ar.student_id = u.id
+        WHERE u.class_id = #{classId}
+        AND ar.attendance_time >= #{startDate}
+        AND ar.attendance_time &lt; #{endDate}
+        ORDER BY ar.attendance_time
+    </select>
+
+    <!-- 查询所有考勤记录 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM attendance_record
+    </select>
+
+    <!-- 根据状态查询考勤记录 -->
+    <select id="selectByStatus" parameterType="string" resultMap="BaseResultMap">
+        SELECT * FROM attendance_record WHERE status = #{status}
+    </select>
+</mapper>

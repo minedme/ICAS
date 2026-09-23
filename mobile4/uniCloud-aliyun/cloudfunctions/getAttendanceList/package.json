@@ -1,0 +1,9 @@
+{
+  "name": "getAttendanceList",
+  "version": "1.0.0",
+  "description": "获取考勤列表云函数",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC"
+}

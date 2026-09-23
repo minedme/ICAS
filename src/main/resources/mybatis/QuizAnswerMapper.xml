@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.QuizAnswerMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.QuizAnswer">
+        <id column="id" property="id" />
+        <result column="quiz_id" property="quizId" />
+        <result column="question_id" property="questionId" />
+        <result column="student_id" property="studentId" />
+        <result column="student_answer" property="studentAnswer" />
+        <result column="is_correct" property="isCorrect" />
+        <result column="score" property="score" />
+        <result column="answer_time" property="answerTime" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.demo.model.QuizAnswer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quiz_answer (quiz_id, question_id, student_id, student_answer, is_correct, score, answer_time)
+        VALUES (#{quizId}, #{questionId}, #{studentId}, #{studentAnswer}, #{isCorrect}, #{score}, #{answerTime})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO quiz_answer (quiz_id, question_id, student_id, student_answer, is_correct, score, answer_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.quizId}, #{item.questionId}, #{item.studentId}, #{item.studentAnswer}, #{item.isCorrect}, #{item.score}, #{item.answerTime})
+        </foreach>
+    </insert>
+    
+    <update id="update" parameterType="com.example.demo.model.QuizAnswer">
+        UPDATE quiz_answer
+        SET student_answer = #{studentAnswer}, is_correct = #{isCorrect}, score = #{score}, answer_time = #{answerTime}
+        WHERE quiz_id = #{quizId} AND question_id = #{questionId} AND student_id = #{studentId}
+    </update>
+    
+    <update id="updateBatch" parameterType="java.util.List">
+        UPDATE quiz_answer
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="student_answer = CASE" suffix="END,">
+                <foreach collection="list" item="item">
+                    WHEN quiz_id = #{item.quizId} AND question_id = #{item.questionId} AND student_id = #{item.studentId}
+                    THEN #{item.studentAnswer}
+                </foreach>
+            </trim>
+            <trim prefix="is_correct = CASE" suffix="END,">
+                <foreach collection="list" item="item">
+                    WHEN quiz_id = #{item.quizId} AND question_id = #{item.questionId} AND student_id = #{item.studentId}
+                    THEN #{item.isCorrect}
+                </foreach>
+            </trim>
+            <trim prefix="score = CASE" suffix="END,">
+                <foreach collection="list" item="item">
+                    WHEN quiz_id = #{item.quizId} AND question_id = #{item.questionId} AND student_id = #{item.studentId}
+                    THEN #{item.score}
+                </foreach>
+            </trim>
+            <trim prefix="answer_time = CASE" suffix="END">
+                <foreach collection="list" item="item">
+                    WHEN quiz_id = #{item.quizId} AND question_id = #{item.questionId} AND student_id = #{item.studentId}
+                    THEN #{item.answerTime}
+                </foreach>
+            </trim>
+        </trim>
+        WHERE
+        <foreach collection="list" item="item" separator=" OR ">
+            quiz_id = #{item.quizId} AND question_id = #{item.questionId} AND student_id = #{item.studentId}
+        </foreach>
+    </update>
+
+    <select id="selectByQuizId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM quiz_answer WHERE quiz_id = #{quizId}
+    </select>
+
+    <select id="selectByStudentIdAndQuizId" resultMap="BaseResultMap">
+        SELECT * FROM quiz_answer WHERE student_id = #{studentId} AND quiz_id = #{quizId}
+    </select>
+
+    <select id="selectByStudentId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM quiz_answer WHERE student_id = #{studentId}
+    </select>
+
+    <select id="selectScoreByStudentIdAndQuizId" resultType="java.lang.Integer">
+        SELECT SUM(score) FROM quiz_answer WHERE student_id = #{studentId} AND quiz_id = #{quizId}
+    </select>
+    
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM quiz_answer
+    </select>
+</mapper>

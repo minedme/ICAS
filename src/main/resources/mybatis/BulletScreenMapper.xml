@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BulletScreenMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.BulletScreen">
+        <id column="id" property="id" />
+        <result column="content" property="content" />
+        <result column="sender_id" property="senderId" />
+        <result column="sender_name" property="senderName" />
+        <result column="course_id" property="courseId" />
+        <result column="is_anonymous" property="isAnonymous" />
+        <result column="send_time" property="sendTime" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.demo.model.BulletScreen" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bullet_screen (content, sender_id, sender_name, course_id, is_anonymous, send_time)
+        VALUES (#{content}, #{senderId}, #{senderName}, #{courseId}, #{isAnonymous}, #{sendTime})
+    </insert>
+
+    <select id="selectLatestByCourseId" parameterType="map" resultMap="BaseResultMap">
+        SELECT * FROM bullet_screen WHERE course_id = #{courseId}
+        ORDER BY send_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByCourseId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM bullet_screen WHERE course_id = #{courseId}
+        ORDER BY send_time ASC
+    </select>
+
+    <select id="selectBySenderId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM bullet_screen WHERE sender_id = #{senderId}
+        ORDER BY send_time DESC
+    </select>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM bullet_screen WHERE id = #{id}
+    </delete>
+</mapper>

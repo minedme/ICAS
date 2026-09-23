@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.ClassMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.ClassInfo">
+        <id column="id" property="id"/>
+        <result column="class_name" property="className"/>
+        <result column="class_code" property="classCode"/>
+        <result column="major" property="major"/>
+        <result column="grade" property="grade"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+        <result column="student_count" property="studentCount"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.demo.model.ClassInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO class_info (class_name, class_code, major, grade, teacher_id, description, status, create_time, update_time)
+        VALUES (#{className}, #{classCode}, #{major}, #{grade}, #{teacherId}, #{description}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.ClassInfo">
+        UPDATE class_info
+        SET class_name = #{className},
+            class_code = #{classCode},
+            major = #{major},
+            grade = #{grade},
+            teacher_id = #{teacherId},
+            description = #{description},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM class_info WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="int" resultMap="BaseResultMap">
+        SELECT c.*, u.real_name as teacher_name
+        FROM class_info c
+        LEFT JOIN user u ON c.teacher_id = u.id
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="selectByCode" parameterType="string" resultMap="BaseResultMap">
+        SELECT c.*, u.real_name as teacher_name,
+               (SELECT COUNT(*) FROM user WHERE class_id = c.id AND role = 'student') as student_count
+        FROM class_info c
+        LEFT JOIN user u ON c.teacher_id = u.id
+        WHERE c.class_code = #{classCode}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT c.*, u.real_name as teacher_name, 
+               (SELECT COUNT(*) FROM user WHERE class_id = c.id AND role = 'student') as student_count
+        FROM class_info c
+        LEFT JOIN user u ON c.teacher_id = u.id
+        WHERE c.status = 1
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectByTeacherId" parameterType="int" resultMap="BaseResultMap">
+        SELECT c.*, u.real_name as teacher_name,
+               (SELECT COUNT(*) FROM user WHERE class_id = c.id AND role = 'student') as student_count
+        FROM class_info c
+        LEFT JOIN user u ON c.teacher_id = u.id
+        WHERE c.teacher_id = #{teacherId} AND c.status = 1
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectByPage" resultMap="BaseResultMap">
+        SELECT c.*, u.real_name as teacher_name,
+               (SELECT COUNT(*) FROM user WHERE class_id = c.id AND role = 'student') as student_count
+        FROM class_info c
+        LEFT JOIN user u ON c.teacher_id = u.id
+        WHERE c.status = 1
+        ORDER BY c.create_time DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM class_info WHERE status = 1
+    </select>
+
+    <select id="searchClasses" resultMap="BaseResultMap">
+        SELECT c.*, u.real_name as teacher_name,
+               (SELECT COUNT(*) FROM user WHERE class_id = c.id AND role = 'student') as student_count
+        FROM class_info c
+        LEFT JOIN user u ON c.teacher_id = u.id
+        WHERE c.status = 1
+        <if test="className != null and className != ''">
+            AND c.class_name LIKE CONCAT('%', #{className}, '%')
+        </if>
+        <if test="classCode != null and classCode != ''">
+            AND c.class_code LIKE CONCAT('%', #{classCode}, '%')
+        </if>
+        <if test="major != null and major != ''">
+            AND c.major LIKE CONCAT('%', #{major}, '%')
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+
+    <update id="updateStudentCount">
+        UPDATE class_info
+        SET student_count = #{count}
+        WHERE id = #{classId}
+    </update>
+</mapper>

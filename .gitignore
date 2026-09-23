@@ -1,0 +1,29 @@
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Storage
+storage/
+
+# Config with sensitive info
+src/main/resources/application.yml
+src/main/resources/application-local.yml
+
+# Mobile node_modules & cache
+**/node_modules/
+mobile4/npm_cache/
+mobile4/unpackage/
+mobile4/.hbuilderx/

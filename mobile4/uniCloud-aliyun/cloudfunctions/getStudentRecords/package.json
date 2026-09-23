@@ -1,0 +1,7 @@
+{
+  "name": "getStudentRecords",
+  "version": "1.0.0",
+  "description": "获取学生考勤记录",
+  "main": "index.js",
+  "dependencies": {}
+}

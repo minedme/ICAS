@@ -1,0 +1,7 @@
+{
+  "name": "getStudentQuizList",
+  "version": "1.0.0",
+  "description": "获取学生测验列表",
+  "main": "index.js",
+  "dependencies": {}
+}

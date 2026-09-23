@@ -1,0 +1,22 @@
+{
+  "name": "icas-mobile",
+  "version": "1.0.0",
+  "description": "智能课堂考勤与学习行为分析系统移动端",
+  "scripts": {
+    "dev": "npm run serve",
+    "serve": "vue-cli-service uni-serve",
+    "build": "vue-cli-service uni-build",
+    "build:mp-weixin": "vue-cli-service uni-build --platform mp-weixin",
+    "build:h5": "vue-cli-service uni-build --platform h5"
+  },
+  "dependencies": {
+    "vue": "^2.6.11",
+    "@dcloudio/uni-app": "^2.0.0",
+    "@dcloudio/uni-ui": "^1.2.5"
+  },
+  "devDependencies": {
+    "@dcloudio/vue-cli-plugin-uni": "^2.0.0",
+    "vue-cli-plugin-uni-preset-vue": "^2.0.0",
+    "@vue/cli-service": "^4.5.0"
+  }
+}

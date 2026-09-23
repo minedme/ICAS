@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.AttendanceMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.demo.model.Attendance">
+        <id column="id" property="id"/>
+        <result column="course_name" property="courseName"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="qr_code" property="qrCode"/>
+        <result column="min_latitude" property="minLatitude"/>
+        <result column="max_latitude" property="maxLatitude"/>
+        <result column="min_longitude" property="minLongitude"/>
+        <result column="max_longitude" property="maxLongitude"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="file_path" property="filePath"/>
+    </resultMap>
+
+    <!-- 创建考勤任务 -->
+    <insert id="insert" parameterType="com.example.demo.model.Attendance" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO attendance (course_name, teacher_id, start_time, end_time, qr_code, 
+                               min_latitude, max_latitude, min_longitude, max_longitude, 
+                               status, create_time, file_path)
+        VALUES (#{courseName}, #{teacherId}, #{startTime}, #{endTime}, #{qrCode}, 
+                #{minLatitude}, #{maxLatitude}, #{minLongitude}, #{maxLongitude}, 
+                #{status}, #{createTime}, #{filePath})
+    </insert>
+
+    <!-- 更新考勤任务 -->
+    <update id="update" parameterType="com.example.demo.model.Attendance">
+        UPDATE attendance
+        SET course_name = #{courseName}, teacher_id = #{teacherId}, start_time = #{startTime}, 
+            end_time = #{endTime}, qr_code = #{qrCode}, min_latitude = #{minLatitude}, 
+            max_latitude = #{maxLatitude}, min_longitude = #{minLongitude}, 
+            max_longitude = #{maxLongitude}, status = #{status}, file_path = #{filePath}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID查询考勤任务 -->
+    <select id="selectById" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM attendance WHERE id = #{id}
+    </select>
+
+    <!-- 根据教师ID查询考勤任务 -->
+    <select id="selectByTeacherId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM attendance WHERE teacher_id = #{teacherId}
+    </select>
+
+    <!-- 查询所有考勤任务 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM attendance
+    </select>
+
+    <!-- 根据二维码查询考勤任务 -->
+    <select id="selectByQrCode" parameterType="string" resultMap="BaseResultMap">
+        SELECT * FROM attendance WHERE qr_code = #{qrCode}
+    </select>
+
+    <!-- 更新二维码 -->
+    <update id="updateQrCode">
+        UPDATE attendance SET qr_code = #{qrCode} WHERE id = #{id}
+    </update>
+</mapper>

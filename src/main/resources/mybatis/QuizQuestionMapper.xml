@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.QuizQuestionMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.QuizQuestion">
+        <id column="id" property="id" />
+        <result column="quiz_id" property="quizId" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="type" property="type" />
+        <result column="option_a" property="optionA" />
+        <result column="option_b" property="optionB" />
+        <result column="option_c" property="optionC" />
+        <result column="option_d" property="optionD" />
+        <result column="correct_answer" property="correctAnswer" />
+        <result column="score" property="score" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.demo.model.QuizQuestion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quiz_question (quiz_id, content, type, option_a, option_b, option_c, option_d, correct_answer, score)
+        VALUES (#{quizId}, #{content}, #{type}, #{optionA}, #{optionB}, #{optionC}, #{optionD}, #{correctAnswer}, #{score})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO quiz_question (quiz_id, content, type, option_a, option_b, option_c, option_d, correct_answer, score)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.quizId}, #{item.content}, #{item.type}, #{item.optionA}, #{item.optionB}, #{item.optionC}, #{item.optionD}, #{item.correctAnswer}, #{item.score})
+        </foreach>
+    </insert>
+
+    <select id="selectByQuizId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM quiz_question WHERE quiz_id = #{quizId}
+    </select>
+
+    <select id="selectById" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM quiz_question WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.example.demo.model.QuizQuestion">
+        UPDATE quiz_question
+        SET content = #{content},
+            type = #{type},
+            option_a = #{optionA},
+            option_b = #{optionB},
+            option_c = #{optionC},
+            option_d = #{optionD},
+            correct_answer = #{correctAnswer},
+            score = #{score}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM quiz_question WHERE id = #{id}
+    </delete>
+    
+    <delete id="deleteByQuizId" parameterType="int">
+        DELETE FROM quiz_question WHERE quiz_id = #{quizId}
+    </delete>
+</mapper>

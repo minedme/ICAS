@@ -1,0 +1,142 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/register/register",
+      "style": {
+        "navigationBarTitleText": "注册"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/student/attendance/scan",
+      "style": {
+        "navigationBarTitleText": "扫码签到"
+      }
+    },
+    {
+      "path": "pages/student/attendance/gps",
+      "style": {
+        "navigationBarTitleText": "GPS签到"
+      }
+    },
+    {
+      "path": "pages/student/attendance/records",
+      "style": {
+        "navigationBarTitleText": "考勤记录"
+      }
+    },
+    {
+      "path": "pages/student/quiz/list",
+      "style": {
+        "navigationBarTitleText": "测验列表"
+      }
+    },
+    {
+      "path": "pages/student/quiz/take",
+      "style": {
+        "navigationBarTitleText": "参加测验"
+      }
+    },
+    {
+      "path": "pages/teacher/dashboard",
+      "style": {
+        "navigationBarTitleText": "教师仪表盘"
+      }
+    },
+    {
+      "path": "pages/teacher/attendance/create",
+      "style": {
+        "navigationBarTitleText": "创建考勤"
+      }
+    },
+    {
+      "path": "pages/teacher/attendance/list",
+      "style": {
+        "navigationBarTitleText": "考勤管理"
+      }
+    },
+    {
+      "path": "pages/teacher/attendance/qrcode",
+      "style": {
+        "navigationBarTitleText": "考勤二维码"
+      }
+    },
+    {
+      "path": "pages/teacher/attendance/view",
+      "style": {
+        "navigationBarTitleText": "考勤记录"
+      }
+    },
+    {
+      "path": "pages/teacher/quiz/create",
+      "style": {
+        "navigationBarTitleText": "创建测验"
+      }
+    },
+    {
+      "path": "pages/teacher/quiz/list",
+      "style": {
+        "navigationBarTitleText": "测验管理"
+      }
+    },
+    {
+      "path": "pages/teacher/analysis",
+      "style": {
+        "navigationBarTitleText": "数据分析"
+      }
+    },
+    {
+      "path": "pages/bullet/send",
+      "style": {
+        "navigationBarTitleText": "发送弹幕"
+      }
+    },
+    {
+      "path": "pages/bullet/list",
+      "style": {
+        "navigationBarTitleText": "弹幕列表"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "智能课堂",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#2196F3",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/student/attendance/scan",
+        "text": "签到"
+      },
+      {
+        "pagePath": "pages/student/quiz/list",
+        "text": "测验"
+      },
+      {
+        "pagePath": "pages/bullet/send",
+        "text": "弹幕"
+      }
+    ]
+  }
+}
