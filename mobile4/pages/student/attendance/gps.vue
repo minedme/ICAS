@@ -58,6 +58,7 @@ export default {
   onShow() {
     if (this.role === '学生') {
       this.loadAttendances()
+      this.getLocation()
     }
   },
   methods: {
