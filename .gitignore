@@ -27,3 +27,15 @@ mobile4/node_modules/
 mobile4/npm_cache/
 mobile4/unpackage/
 mobile4/.hbuilderx/
+
+# WorkBuddy workspace data
+.workbuddy/
+
+# Node dependencies (含 uniCloud 云函数下的)
+node_modules/
+
+# Test artifacts
+test_qr_code.png
+
+# 误操作生成的页面转储（本地保留，退出跟踪）
+/-
