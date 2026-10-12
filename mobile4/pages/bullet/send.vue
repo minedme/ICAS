@@ -151,7 +151,7 @@ export default {
       this.bullets.push(newBullet);
       
       // 调用后端API发送弹幕
-      this.$api.post('/mobile/bullet/send', {
+      this.$api.post('/mobile/student/bullet/send', {
         studentId: this.userInfo.id,
         content: newBullet.content,
         color: newBullet.color,

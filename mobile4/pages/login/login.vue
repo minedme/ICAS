@@ -97,20 +97,22 @@ export default {
       }
       
       uni.showToast({ title: '登录中...', icon: 'loading' });
-      
-      this.$api.login(this.form.username, this.form.password).then(res => {
+
+      // 走后端 /mobile/login，登录态由 Session Cookie 维持
+      this.$api.post('/mobile/login', {
+        username: this.form.username,
+        password: this.form.password,
+        role: this.form.role
+      }).then(res => {
         if (res.code === 200) {
           uni.showToast({ title: '登录成功', icon: 'success' });
           uni.setStorageSync('userInfo', res.data);
           uni.setStorageSync('role', res.data.role);
-          
+
+          const role = res.data.role;
           setTimeout(() => {
-            if (res.data.role === '学生') {
-              uni.reLaunch({ url: '/pages/index/index' });
-            } else if (res.data.role === '教师') {
+            if (role === '教师' || role === 'teacher') {
               uni.reLaunch({ url: '/pages/teacher/dashboard' });
-            } else if (res.data.role === '管理员') {
-              uni.reLaunch({ url: '/pages/index/index' });
             } else {
               uni.reLaunch({ url: '/pages/index/index' });
             }

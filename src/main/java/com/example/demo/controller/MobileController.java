@@ -40,12 +40,23 @@ public class MobileController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // 用户登录
+    // 用户登录（登录成功写入 Session，后续接口身份一律取自 Session）
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
+    public Map<String, Object> login(@RequestParam String username, @RequestParam String password, @RequestParam String role,
+                                     HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         User user = userService.login(username, password, role);
+        if (user == null) {
+            // 兼容 Web 端英文角色 / 移动端中文角色的历史数据差异
+            String alias = roleAlias(role);
+            if (alias != null) {
+                user = userService.login(username, password, alias);
+            }
+        }
         if (user != null) {
+            user.setPassword(null); // 会话与会话响应均不携带密码哈希
+            session.setAttribute("user", user);
+            session.setAttribute("role", user.getRole());
             result.put("code", 200);
             result.put("message", "登录成功");
             result.put("data", user);
@@ -54,6 +65,22 @@ public class MobileController {
             result.put("message", "用户名、密码或角色错误");
         }
         return result;
+    }
+
+    /** 中英文角色别名映射（学生↔student、教师↔teacher、管理员↔admin） */
+    private String roleAlias(String role) {
+        if (role == null) {
+            return null;
+        }
+        switch (role) {
+            case "学生":   return "student";
+            case "student": return "学生";
+            case "教师":   return "teacher";
+            case "teacher": return "教师";
+            case "管理员": return "admin";
+            case "admin":  return "管理员";
+            default:       return null;
+        }
     }
 
     // 用户注册
@@ -93,8 +120,9 @@ public class MobileController {
 
     // 扫码签到
     @PostMapping("/attendance/scan")
-    public Map<String, Object> scanSign(@RequestParam String qrCode, @RequestParam Integer studentId) {
+    public Map<String, Object> scanSign(@RequestParam String qrCode, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        User user = currentUser(session);
 
         // 根据二维码查询考勤任务
         Attendance attendance = attendanceService.getAttendanceByQrCode(qrCode);
@@ -105,7 +133,7 @@ public class MobileController {
         }
 
         // 检查是否已签到
-        if (recordService.isStudentSigned(attendance.getId(), studentId)) {
+        if (recordService.isStudentSigned(attendance.getId(), user.getId())) {
             result.put("code", 400);
             result.put("message", "您已签到");
             return result;
@@ -114,7 +142,7 @@ public class MobileController {
         // 创建考勤记录
         AttendanceRecord record = new AttendanceRecord();
         record.setAttendanceId(attendance.getId());
-        record.setStudentId(studentId);
+        record.setStudentId(user.getId());
 
         boolean success = recordService.scanSign(record);
         if (success) {
@@ -129,12 +157,13 @@ public class MobileController {
 
     // GPS定位签到
     @PostMapping("/attendance/gps")
-    public Map<String, Object> gpsSign(@RequestParam Integer attendanceId, @RequestParam Double latitude, 
-                                      @RequestParam Double longitude, @RequestParam Integer studentId) {
+    public Map<String, Object> gpsSign(@RequestParam Integer attendanceId, @RequestParam Double latitude,
+                                      @RequestParam Double longitude, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        User user = currentUser(session);
 
         // 检查是否已签到
-        if (recordService.isStudentSigned(attendanceId, studentId)) {
+        if (recordService.isStudentSigned(attendanceId, user.getId())) {
             result.put("code", 400);
             result.put("message", "您已签到");
             return result;
@@ -143,7 +172,7 @@ public class MobileController {
         // 创建考勤记录
         AttendanceRecord record = new AttendanceRecord();
         record.setAttendanceId(attendanceId);
-        record.setStudentId(studentId);
+        record.setStudentId(user.getId());
 
         boolean success = recordService.gpsSign(record, latitude, longitude);
         if (success) {
@@ -158,9 +187,10 @@ public class MobileController {
 
     // 获取学生考勤记录
     @GetMapping("/student/attendance/records")
-    public Map<String, Object> getStudentAttendanceRecords(@RequestParam Integer studentId) {
+    public Map<String, Object> getStudentAttendanceRecords(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
-        List<AttendanceRecord> records = recordService.getRecordsByStudentId(studentId);
+        User user = currentUser(session);
+        List<AttendanceRecord> records = recordService.getRecordsByStudentId(user.getId());
         result.put("code", 200);
         result.put("message", "查询成功");
         result.put("data", records);
@@ -169,7 +199,7 @@ public class MobileController {
 
     // 获取学生测验列表
     @GetMapping("/student/quiz/list")
-    public Map<String, Object> getStudentQuizList(@RequestParam Integer studentId) {
+    public Map<String, Object> getStudentQuizList() {
         Map<String, Object> result = new HashMap<>();
         List<Quiz> quizzes = quizService.getAllQuizzes();
         result.put("code", 200);
@@ -195,11 +225,13 @@ public class MobileController {
 
     // 提交测验答案
     @PostMapping("/student/quiz/submit")
-    public Map<String, Object> submitQuizAnswer(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> submitQuizAnswer(@RequestBody Map<String, Object> request, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         try {
+            User user = currentUser(session);
             Integer quizId = (Integer) request.get("quizId");
-            Integer studentId = (Integer) request.get("studentId");
+            // 身份以 Session 为准，忽略客户端传入的 studentId
+            Integer studentId = user.getId();
             List<Map<String, Object>> answers = (List<Map<String, Object>>) request.get("answers");
             
             List<QuizAnswer> quizAnswers = new ArrayList<>();
@@ -247,12 +279,13 @@ public class MobileController {
 
     // 发送弹幕
     @PostMapping("/student/bullet/send")
-    public Map<String, Object> sendBulletScreen(@RequestParam Integer courseId, @RequestParam Integer studentId,
-                                               @RequestParam String content) {
+    public Map<String, Object> sendBulletScreen(@RequestParam Integer courseId, @RequestParam String content,
+                                                HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        User user = currentUser(session);
         BulletScreen bulletScreen = new BulletScreen();
         bulletScreen.setCourseId(courseId);
-        bulletScreen.setSenderId(studentId);
+        bulletScreen.setSenderId(user.getId());
         bulletScreen.setContent(content);
         bulletScreen.setSendTime(new Date());
         boolean success = bulletScreenService.sendBulletScreen(bulletScreen);
@@ -279,10 +312,15 @@ public class MobileController {
 
     // 教师创建考勤
     @PostMapping("/teacher/attendance/create")
-    public Map<String, Object> createAttendance(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> createAttendance(@RequestBody Map<String, Object> request, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         try {
-            Integer teacherId = (Integer) request.get("teacherId");
+            User user = currentUser(session);
+            if (!isTeacher(user)) {
+                return forbidden("仅教师可创建考勤");
+            }
+            // 身份以 Session 为准，忽略客户端传入的 teacherId
+            Integer teacherId = user.getId();
             String courseName = (String) request.get("courseName");
             String startTime = (String) request.get("startTime");
             String endTime = (String) request.get("endTime");
@@ -340,9 +378,13 @@ public class MobileController {
 
     // 获取教师考勤列表
     @GetMapping("/teacher/attendance/list")
-    public Map<String, Object> getTeacherAttendanceList(@RequestParam Integer teacherId) {
+    public Map<String, Object> getTeacherAttendanceList(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
-        List<Attendance> attendances = attendanceService.getAttendancesByTeacherId(teacherId);
+        User user = currentUser(session);
+        if (!isTeacher(user)) {
+            return forbidden("仅教师可查看考勤列表");
+        }
+        List<Attendance> attendances = attendanceService.getAttendancesByTeacherId(user.getId());
         result.put("code", 200);
         result.put("message", "查询成功");
         result.put("data", attendances);
@@ -351,8 +393,11 @@ public class MobileController {
 
     // 获取考勤详情（包含二维码）
     @GetMapping("/teacher/attendance/detail")
-    public Map<String, Object> getAttendanceDetail(@RequestParam Integer attendanceId) {
+    public Map<String, Object> getAttendanceDetail(@RequestParam Integer attendanceId, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        if (!isTeacher(currentUser(session))) {
+            return forbidden("仅教师可查看考勤详情");
+        }
         Attendance attendance = attendanceService.getAttendanceById(attendanceId);
         List<AttendanceRecord> records = recordService.getRecordsByAttendanceId(attendanceId);
         Map<String, Object> data = new HashMap<>();
@@ -366,8 +411,11 @@ public class MobileController {
 
     // 刷新二维码
     @PostMapping("/teacher/attendance/refresh")
-    public Map<String, Object> refreshQrCode(@RequestParam Integer attendanceId) {
+    public Map<String, Object> refreshQrCode(@RequestParam Integer attendanceId, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        if (!isTeacher(currentUser(session))) {
+            return forbidden("仅教师可刷新二维码");
+        }
         boolean success = attendanceService.refreshQrCode(attendanceId);
         if (success) {
             Attendance attendance = attendanceService.getAttendanceById(attendanceId);
@@ -383,8 +431,11 @@ public class MobileController {
 
     // 生成二维码图片
     @GetMapping("/teacher/attendance/qrcode/image")
-    public Map<String, Object> generateQrCodeImage(@RequestParam Integer attendanceId) {
+    public Map<String, Object> generateQrCodeImage(@RequestParam Integer attendanceId, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        if (!isTeacher(currentUser(session))) {
+            return forbidden("仅教师可获取二维码");
+        }
         try {
             Attendance attendance = attendanceService.getAttendanceById(attendanceId);
             if (attendance == null) {
@@ -404,6 +455,30 @@ public class MobileController {
             result.put("code", 500);
             result.put("message", "二维码生成失败：" + e.getMessage());
         }
+        return result;
+    }
+
+    // ===== 身份辅助方法 =====
+
+    /** 从 Session 获取当前登录用户（拦截器已保证存在） */
+    private User currentUser(HttpSession session) {
+        Object userObj = session.getAttribute("user");
+        if (!(userObj instanceof User)) {
+            throw new IllegalStateException("未登录或会话已过期");
+        }
+        return (User) userObj;
+    }
+
+    /** 兼容 Web 端英文角色与移动端中文角色 */
+    private boolean isTeacher(User user) {
+        String role = user.getRole();
+        return "teacher".equals(role) || "教师".equals(role);
+    }
+
+    private Map<String, Object> forbidden(String message) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 403);
+        result.put("message", message);
         return result;
     }
 }

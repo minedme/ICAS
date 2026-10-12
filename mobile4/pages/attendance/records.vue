@@ -104,7 +104,7 @@ export default {
       this.loading = true
       
       // 调用后端API获取考勤记录
-      this.$api.get('/mobile/attendance/records', {
+      this.$api.get('/mobile/student/attendance/records', {
         studentId: this.userInfo.id,
         page: this.page,
         pageSize: this.pageSize,

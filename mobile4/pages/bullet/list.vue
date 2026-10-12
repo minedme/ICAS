@@ -76,7 +76,7 @@ export default {
       this.loading = true;
       
       // 调用后端API获取弹幕列表
-      this.$api.get('/mobile/bullet/list', {
+      this.$api.get('/mobile/student/bullet/list', {
         page: this.page,
         pageSize: this.pageSize
       }).then(res => {

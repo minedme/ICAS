@@ -12,16 +12,30 @@ Vue.prototype.$cloud = uniCloud.init({
 })
 
 Vue.prototype.$api = {
-  request: function(url, method, data) {
+  // 后端地址与 application.yml 的 server.port 保持一致
+  BASE_URL: 'http://192.168.91.93:8080',
+  request: function(url, method, data, options) {
+    options = options || {}
     return new Promise((resolve, reject) => {
       uni.request({
-        url: 'http://192.168.91.93:8091' + url,
+        url: this.BASE_URL + url,
         method: method,
         data: data,
+        // POST 默认 form 编码（配合后端 @RequestParam）；
+        // options.json=true 时用 JSON（配合后端 @RequestBody）
         header: {
-          'content-type': 'application/json'
+          'content-type': options.json ? 'application/json' : 'application/x-www-form-urlencoded'
         },
+        // H5 端跨域携带 Session Cookie；App 端 uni.request 自动管理 Cookie
+        withCredentials: true,
         success: (res) => {
+          // 统一处理未登录/无权限
+          if (res.statusCode === 401) {
+            uni.showToast({ title: '请先登录', icon: 'none' })
+            setTimeout(() => uni.reLaunch({ url: '/pages/login/login' }), 800)
+            reject(new Error('未登录'))
+            return
+          }
           resolve(res.data)
         },
         fail: (err) => {
@@ -35,6 +49,9 @@ Vue.prototype.$api = {
   },
   post: function(url, data) {
     return this.request(url, 'POST', data)
+  },
+  postJSON: function(url, data) {
+    return this.request(url, 'POST', data, { json: true })
   },
   put: function(url, data) {
     return this.request(url, 'PUT', data)

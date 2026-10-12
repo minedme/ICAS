@@ -323,7 +323,7 @@ export default {
       };
       
       // 调用后端API提交答案
-      this.$api.post('/mobile/student/quiz/submit', submitData).then(res => {
+      this.$api.postJSON('/mobile/student/quiz/submit', submitData).then(res => {
         if (res.code === 200) {
           // 提交成功，显示结果
           uni.showModal({
